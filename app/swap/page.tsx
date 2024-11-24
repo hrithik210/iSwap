@@ -14,9 +14,9 @@ export default function SwapPage() {
   return (
     <div className="flex items-center justify-center p-4 flex-grow">
       <Card className="w-full max-w-md">
-        <CardHeader className="flex flex-row items-center justify-between">
+        <CardHeader className="flex flex-row items-center justify-between border-b border-border">
           <CardTitle>Swap</CardTitle>
-          <Button variant="outline" size="icon">
+          <Button variant="secondary" size="icon">
             <Settings className="h-4 w-4" />
           </Button>
         </CardHeader>
@@ -31,10 +31,10 @@ export default function SwapPage() {
                 placeholder="0.0"
                 value={fromAmount}
                 onChange={(e) => setFromAmount(e.target.value)}
-                className="flex-grow"
+                className="flex-grow bg-input"
               />
               <Select>
-                <SelectTrigger className="w-[120px]">
+                <SelectTrigger className="w-[120px] bg-input">
                   <SelectValue placeholder="Select token" />
                 </SelectTrigger>
                 <SelectContent>
@@ -60,10 +60,10 @@ export default function SwapPage() {
                 placeholder="0.0"
                 value={toAmount}
                 onChange={(e) => setToAmount(e.target.value)}
-                className="flex-grow"
+                className="flex-grow bg-input"
               />
               <Select>
-                <SelectTrigger className="w-[120px]">
+                <SelectTrigger className="w-[120px] bg-input">
                   <SelectValue placeholder="Select token" />
                 </SelectTrigger>
                 <SelectContent>
