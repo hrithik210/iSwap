@@ -10,11 +10,11 @@ const Header = () => {
   const wallet = useWallet();
   return (
     <div>
-     <header className="p-4 border-b border-gray-800">
+     <header className="p-4 border-b border-white">
       <nav className="container mx-auto flex justify-between items-center">
         <Link href="/" className="text-2xl font-bold italic">iSwap</Link>
         <div className="flex items-center space-x-4">
-          <Button asChild variant="outline" className="bg-black text-white">
+          <Button asChild variant="outline" className="bg-white text-black font-semibold">
             <Link href="/swap">Launch App</Link>
           </Button>
           
