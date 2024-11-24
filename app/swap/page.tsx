@@ -13,14 +13,14 @@ export default function SwapPage() {
 
   return (
     <div className="flex items-center justify-center p-4 flex-grow">
-      <Card className="w-full max-w-md">
-        <CardHeader className="flex flex-row items-center justify-between border-b border-border">
-          <CardTitle>Swap</CardTitle>
+      <Card className="w-full max-w-md shadow-2xl border border-gray-900">
+        <CardHeader className="flex flex-row items-center justify-between bg-black text-white">
+          <CardTitle className='text-white'>Swap</CardTitle>
           <Button variant="secondary" size="icon">
             <Settings className="h-4 w-4" />
           </Button>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-4 bg-black">
           <div className="space-y-2">
             <div className="flex justify-between">
               <label htmlFor="fromAmount" className="text-sm font-medium">From</label>
@@ -31,13 +31,13 @@ export default function SwapPage() {
                 placeholder="0.0"
                 value={fromAmount}
                 onChange={(e) => setFromAmount(e.target.value)}
-                className="flex-grow bg-input"
+                className="flex-grow bg-gray-600 text-white"
               />
               <Select>
-                <SelectTrigger className="w-[120px] bg-input">
+                <SelectTrigger className="w-[120px] bg-black text-white">
                   <SelectValue placeholder="Select token" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className='bg-black text-white'>
                   <SelectItem value="eth">ETH</SelectItem>
                   <SelectItem value="usdc">USDC</SelectItem>
                   <SelectItem value="dai">DAI</SelectItem>
@@ -46,9 +46,10 @@ export default function SwapPage() {
             </div>
           </div>
           <div className="flex justify-center">
-            <Button variant="ghost" size="icon">
-              <ArrowDownUp className="h-4 w-4" />
-            </Button>
+            <button className='hover:bg-gray-800'> 
+              <ArrowDownUp className="h-4 w-4 bg-black hover:bg-black text-white" />
+            </button>
+             
           </div>
           <div className="space-y-2">
             <div className="flex justify-between">
@@ -60,13 +61,13 @@ export default function SwapPage() {
                 placeholder="0.0"
                 value={toAmount}
                 onChange={(e) => setToAmount(e.target.value)}
-                className="flex-grow bg-input"
+                className="flex-grow bg-gray-600 text-white" 
               />
               <Select>
-                <SelectTrigger className="w-[120px] bg-input">
+                <SelectTrigger className="w-[120px] bg-black text-white">
                   <SelectValue placeholder="Select token" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className='bg-black text-white'>
                   <SelectItem value="eth">ETH</SelectItem>
                   <SelectItem value="usdc">USDC</SelectItem>
                   <SelectItem value="dai">DAI</SelectItem>
@@ -75,8 +76,8 @@ export default function SwapPage() {
             </div>
           </div>
         </CardContent>
-        <CardFooter>
-          <Button className="w-full">Swap</Button>
+        <CardFooter className='bg-black'>
+          <Button className="w-full bg-white text-black hover:bg-gray-500">Swap</Button>
         </CardFooter>
       </Card>
     </div>
