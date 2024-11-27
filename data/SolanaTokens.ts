@@ -1,4 +1,3 @@
-
 export interface TokenInfo {
   chainId: number;
   address: string;
@@ -43,11 +42,10 @@ export const solanaTokens: TokenInfo[] = [
   },
   {
     chainId: 101,
-    address: "ATLASxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", // Replace with actual mint address
+    address: "ATLASxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", // ATLAS
     name: "Star Atlas",
     symbol: "ATLAS",
     decimals: 6,
     logoURI: "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/ATLASxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/logo.png",
   },
-  
 ];

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -17,45 +17,159 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ArrowDownUp, Settings } from "lucide-react";
+import { ArrowDownUp, Settings, Loader2 } from "lucide-react";
 import { solanaTokens, TokenInfo } from "@/data/SolanaTokens";
 
 export default function SwapPage() {
-  const [fromAmount, setFromAmount] = useState("");
-  const [toAmount, setToAmount] = useState("");
+  
+  const [fromAmount, setFromAmount] = useState<string>("");
+  const [toAmount, setToAmount] = useState<string>("0.0");
   const [fromToken, setFromToken] = useState<string>("");
   const [toToken, setToToken] = useState<string>("");
+  const [error, setError] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+ 
+  interface QuoteResponse {
+    outAmount?: string;
+    error?: string;
+  }
+
+  interface QuoteParams {
+    fromAmount: string;
+    fromToken: string;
+    toToken: string;
+  }
+
+
+  const isValidNumber = (value: string): boolean => {
+    return value === "" || /^\d*\.?\d*$/.test(value);
+  };
+
+
+  const getQuote = async ({ fromAmount, fromToken, toToken }: QuoteParams): Promise<string> => {
+    try {
+      setIsLoading(true);
+      setError("");
+  
+    
+      const fromTokenInfo = solanaTokens.find(token => token.address === fromToken);
+      const toTokenInfo = solanaTokens.find(token => token.address === toToken);
+  
+     
+      if (!fromTokenInfo) {
+        throw new Error("Invalid source token.");
+      }
+      if (!toTokenInfo) {
+        throw new Error("Invalid destination token.");
+      }
+  
+     
+      const amountInSmallestUnit = BigInt(
+        Math.floor(parseFloat(fromAmount) * Math.pow(10, fromTokenInfo.decimals || 0))
+      ).toString();
+  
+      
+      const response = await fetch(
+        `https://quote-api.jup.ag/v6/quote?inputMint=${fromToken}&outputMint=${toToken}&amount=${amountInSmallestUnit}&slippageBps=50`
+      );
+  
+      if (!response.ok) {
+        throw new Error(`API response error: ${response.status}`);
+      }
+  
+      const data: QuoteResponse = await response.json();
+  
+     
+      if (!data?.outAmount) {
+        throw new Error("No valid quote available.");
+      }
+  
+     
+      const toTokenDecimals = toTokenInfo.decimals || 6;
+      const rawOutAmount = BigInt(data.outAmount);
+      const divisor = BigInt(Math.pow(10, toTokenDecimals));
+      
+     
+      const integerPart = rawOutAmount / divisor;
+      const fractionalPart = rawOutAmount % divisor;
+  
+      const formattedOutAmount = `${integerPart.toString()}.${
+        fractionalPart.toString().padStart(toTokenDecimals, '0')
+      }`.replace(/\.?0+$/, '');
+    
+      setToAmount(formattedOutAmount);
+      return formattedOutAmount;
+  
+    } catch (error) {
+      console.error("Quote Fetch Error:", error);
+      setError(error instanceof Error ? error.message : "An unexpected error occurred");
+      return toAmount;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+
+  useEffect(() => {
+    if (fromAmount && fromToken && toToken && isValidNumber(fromAmount)) {
+      const fetchQuote = async () => {
+        await getQuote({ fromAmount, fromToken, toToken });
+      };
+      fetchQuote();
+    }
+  }, [fromAmount, fromToken, toToken]);
+
 
   const handleSwapTokens = () => {
     const temp = fromToken;
     setFromToken(toToken);
     setToToken(temp);
+    
+  
+    const tempAmount = fromAmount;
+    setFromAmount(toAmount);
+    setToAmount(tempAmount);
+  };
+
+  const handleSwap = () => {
+    console.log("Swap Initiated:", {
+      fromAmount,
+      fromToken,
+      toAmount,
+      toToken
+    });
   };
 
   return (
     <div className="flex items-center justify-center p-4 flex-grow">
       <Card className="w-full max-w-md shadow-2xl border border-gray-900">
         <CardHeader className="flex flex-row items-center justify-between bg-black text-white">
-          <CardTitle className="text-white">Swap</CardTitle>
+          <CardTitle className="text-white">Swap Tokens</CardTitle>
           <Button variant="secondary" size="icon">
             <Settings className="h-4 w-4" />
           </Button>
         </CardHeader>
         <CardContent className="space-y-4 bg-black">
-          {/* From Token Selection */}
+       
           <div className="space-y-2">
-            <label htmlFor="fromToken" className="text-sm font-medium text-white">
-              From
-            </label>
+            <label className="text-sm font-medium text-white">From</label>
             <div className="flex space-x-2">
               <Input
-                id="fromAmount"
-                placeholder="0.0"
+                placeholder="Enter amount"
                 value={fromAmount}
-                onChange={(e) => setFromAmount(e.target.value)}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (isValidNumber(value)) {
+                    setFromAmount(value);
+                  }
+                }}
                 className="flex-grow bg-gray-600 text-white"
               />
-              <Select onValueChange={(value) => setFromToken(value)}>
+              <Select 
+                value={fromToken}
+                onValueChange={(value) => setFromToken(value)}
+              >
                 <SelectTrigger className="w-[120px] bg-black text-white">
                   <SelectValue placeholder="Select token" />
                 </SelectTrigger>
@@ -70,7 +184,7 @@ export default function SwapPage() {
             </div>
           </div>
 
-         
+        
           <div className="flex justify-center">
             <button
               className="hover:bg-gray-800 p-2 rounded-full"
@@ -81,20 +195,24 @@ export default function SwapPage() {
             </button>
           </div>
 
+         
           <div className="space-y-2">
-            <label htmlFor="toToken" className="text-sm font-medium text-white">
-              To
-            </label>
+            <label className="text-sm font-medium text-white">To</label>
             <div className="flex space-x-2">
-              <Input
-                id="toAmount"
-                placeholder="0.0"
-                value={toAmount}
-                onChange={(e) => setToAmount(e.target.value)}
-                className="flex-grow bg-gray-600 text-white"
-                readOnly // To make it auto-calculated
-              />
-              <Select onValueChange={(value) => setToToken(value)}>
+              <div
+                className="flex-grow bg-gray-600 text-white p-2 rounded flex items-center"
+                style={{ minHeight: "38px" }}
+              >
+                {isLoading ? (
+                  <Loader2 className="animate-spin h-5 w-5 mx-auto" />
+                ) : (
+                  toAmount || "0.0"
+                )}
+              </div>
+              <Select 
+                value={toToken}
+                onValueChange={(value) => setToToken(value)}
+              >
                 <SelectTrigger className="w-[120px] bg-black text-white">
                   <SelectValue placeholder="Select token" />
                 </SelectTrigger>
@@ -108,16 +226,29 @@ export default function SwapPage() {
               </Select>
             </div>
           </div>
+
+          {error && (
+            <div className="text-red-500 text-sm text-center">{error}</div>
+          )}
         </CardContent>
+        
         <CardFooter className="bg-black">
           <Button
             className="w-full bg-white text-black hover:bg-gray-500"
-            onClick={() => {
-              console.log("Swapping:", fromAmount, fromToken, "to", toAmount, toToken);
-            }}
-            disabled={!fromToken || !toToken || !fromAmount}
+            onClick={handleSwap}
+            disabled={
+              !fromToken || 
+              !toToken || 
+              !fromAmount || 
+              isLoading || 
+              parseFloat(fromAmount) <= 0
+            }
           >
-            Swap
+            {isLoading ? (
+              <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Fetching Quote</>
+            ) : (
+              "Swap"
+            )}
           </Button>
         </CardFooter>
       </Card>
